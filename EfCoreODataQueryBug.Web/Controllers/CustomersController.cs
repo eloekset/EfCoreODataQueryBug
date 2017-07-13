@@ -1,4 +1,6 @@
-﻿using EfCoreODataQueryBug.Web.Models;
+﻿using EfCoreODataQueryBug.Web.Data;
+using EfCoreODataQueryBug.Web.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +43,25 @@ namespace EfCoreODataQueryBug.Web.Controllers
             new Customer { CustomerId = 28, Name = "Customer 28", CustomerSince = DateTimeOffset.Parse("2014-10-05T00:00:00Z"), IsActive = true },
             new Customer { CustomerId = 29, Name = "Customer 29", CustomerSince = DateTimeOffset.Parse("2016-05-05T00:00:00Z"), IsActive = true }
         };
+        private SampleDbContext _dbContext;
+
+        public CustomersController()
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<SampleDbContext>()
+                .UseInMemoryDatabase("Customers");
+            _dbContext = new SampleDbContext(optionsBuilder.Options);
+
+            if (_dbContext.Customers.Count() == 0)
+            {
+                AddSampleCustomersToInMemDb();
+            }
+        }
+
+        private void AddSampleCustomersToInMemDb()
+        {
+            _dbContext.Customers.AddRange(_customers);
+            _dbContext.SaveChanges();
+        }
 
         [EnableQuery(PageSize = 5, AllowedQueryOptions = System.Web.OData.Query.AllowedQueryOptions.All)]
         // Query filter doesn't work with EFCore even though the bug should have been fixed in an earlier version:
@@ -48,7 +69,7 @@ namespace EfCoreODataQueryBug.Web.Controllers
         [ODataRoute]
         public IQueryable<Customer> Get()
         {
-            return _customers.AsQueryable();
+            return _dbContext.Customers.AsQueryable();
         }
     }
 }
