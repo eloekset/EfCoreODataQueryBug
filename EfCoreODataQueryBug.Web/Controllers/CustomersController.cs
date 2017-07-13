@@ -48,16 +48,16 @@ namespace EfCoreODataQueryBug.Web.Controllers
         public CustomersController()
         {
             var optionsBuilder = new DbContextOptionsBuilder<SampleDbContext>()
-                .UseInMemoryDatabase("Customers");
+                .UseSqlServer(@"Data Source=(local)\Sql2016;Initial Catalog=CustomersDb;Integrated Security=true");
             _dbContext = new SampleDbContext(optionsBuilder.Options);
 
             if (_dbContext.Customers.Count() == 0)
             {
-                AddSampleCustomersToInMemDb();
+                AddSampleCustomersToDb();
             }
         }
 
-        private void AddSampleCustomersToInMemDb()
+        private void AddSampleCustomersToDb()
         {
             _dbContext.Customers.AddRange(_customers);
             _dbContext.SaveChanges();
