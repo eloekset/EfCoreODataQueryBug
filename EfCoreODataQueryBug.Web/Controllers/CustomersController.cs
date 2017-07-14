@@ -63,9 +63,9 @@ namespace EfCoreODataQueryBug.Web.Controllers
             _dbContext.SaveChanges();
         }
 
-        [EnableQuery(PageSize = 5, AllowedQueryOptions = System.Web.OData.Query.AllowedQueryOptions.All)]
-        // Query filter doesn't work with EFCore even though the bug should have been fixed in an earlier version:
-        // https://github.com/aspnet/EntityFramework/issues/5877
+        [EnableQuery(PageSize = 5, HandleNullPropagation = System.Web.OData.Query.HandleNullPropagationOption.False, AllowedQueryOptions = System.Web.OData.Query.AllowedQueryOptions.All)]
+        // HandleNullPropagationOption.False is a workaround for issue, which should have been fixed in EFCore 2.0.0-preview1:
+        // https://github.com/aspnet/EntityFramework/issues/9169
         [ODataRoute]
         public IQueryable<Customer> Get()
         {
